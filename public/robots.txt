@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://wellness-leaders.vercel.app
+
+# Sitemaps
+Sitemap: https://wellness-leaders.vercel.app/sitemap.xml
