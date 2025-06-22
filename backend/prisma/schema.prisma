@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String
+  role        UserRole @default(STUDENT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  scores      Score[]
+  progress    UserProgress[]
+  
+  @@map("users")
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  nameJa      String
+  description String?
+  icon        String?
+  color       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  
+  questions   Question[]
+  
+  @@map("categories")
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  type        QuestionType @default(MULTIPLE_CHOICE)
+  difficulty  Difficulty   @default(BASIC)
+  level       Level        @default(STUDENT)
+  image       String?
+  explanation String?
+  timeLimit   Int?         @default(30)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  categoryId  String
+  category    Category     @relation(fields: [categoryId], references: [id])
+  
+  options     Option[]
+  scores      Score[]
+  
+  @@map("questions")
+}
+
+model Option {
+  id         String   @id @default(cuid())
+  text       String
+  isCorrect  Boolean  @default(false)
+  order      Int
+  createdAt  DateTime @default(now())
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id])
+  
+  @@map("options")
+}
+
+model Score {
+  id          String   @id @default(cuid())
+  score       Int
+  maxScore    Int
+  timeSpent   Int
+  isCorrect   Boolean
+  createdAt   DateTime @default(now())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+  
+  @@map("scores")
+}
+
+model UserProgress {
+  id               String   @id @default(cuid())
+  totalQuestions   Int      @default(0)
+  correctAnswers   Int      @default(0)
+  totalScore       Int      @default(0)
+  averageTime      Float?
+  streak           Int      @default(0)
+  lastStudyDate    DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  
+  @@map("user_progress")
+}
+
+enum UserRole {
+  STUDENT
+  PT
+  AT
+  ADMIN
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  TRUE_FALSE
+  TEXT_INPUT
+  IMAGE_SELECT
+}
+
+enum Difficulty {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum Level {
+  STUDENT
+  PT
+  AT
+  EXPERT
+}
